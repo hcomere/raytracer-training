@@ -19,6 +19,8 @@ namespace common
     QVector3D randomVector3D(double a_min, double a_max);
     QVector3D randomVector3DNormalized();
     QVector3D randomVector3DOnHemisphere(const QVector3D& a_normal);
+
+    QVector3D linearToGamma(QVector3D a_linearColor);
 }
 
 #endif

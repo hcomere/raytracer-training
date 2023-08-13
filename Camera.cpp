@@ -74,7 +74,12 @@ QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world, int a_rema
     HitRecord hit;
     if(a_world.hit(a_ray, Interval(0.001, common::infinity), hit)) // 0.001 as min to avoid shadow acne issue
     {
-        QVector3D bounceDirection = common::randomVector3DOnHemisphere(hit.m_normal);
+        // non lambertian distribution
+        //QVector3D bounceDirection = common::randomVector3DOnHemisphere(hit.m_normal);
+
+        // lambertian distribution - more scattering around the normal
+        QVector3D bounceDirection = hit.m_normal + common::randomVector3DNormalized();
+
         return 0.5 * rayColor(Ray(hit.m_p, bounceDirection), a_world, a_remainingDepth-1);
     }
 
@@ -108,6 +113,9 @@ QPixmap Camera::computeImage(int a_feedbackInterval, bool& a_outIsFinished, floa
         if(m_currentPixelSampleCount >= m_samplesPerPixel)
         {
             m_currentPixelColor /= m_samplesPerPixel;
+
+            // Move from linear color space to gamma color space more suitable to display on screen.
+            m_currentPixelColor = common::linearToGamma(m_currentPixelColor);
 
             m_image.setPixelColor(m_currentPixelX, m_currentPixelY, QColor::fromRgbF(m_currentPixelColor.x(), m_currentPixelColor.y(), m_currentPixelColor.z()));
             ++m_computedPixels;

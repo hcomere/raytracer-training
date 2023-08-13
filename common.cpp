@@ -57,4 +57,9 @@ namespace common
         else
             return -onUnitSphere;
     }
+
+    QVector3D linearToGamma(QVector3D a_linearColor)
+    {
+        return QVector3D(sqrt(a_linearColor.x()), sqrt(a_linearColor.y()), sqrt(a_linearColor.z()));
+    }
 }
