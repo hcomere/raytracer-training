@@ -24,4 +24,37 @@ namespace common
         // Returns a random real in [min,max).
         return a_min + (a_max-a_min)*randomDouble();
     }
+
+    QVector3D randomVector3D()
+    {
+        return QVector3D(randomDouble(), randomDouble(), randomDouble());
+    }
+
+    QVector3D randomVector3D(double a_min, double a_max)
+    {
+        return QVector3D(randomDouble(a_min, a_max), randomDouble(a_min, a_max), randomDouble(a_min, a_max));
+    }
+
+    QVector3D randomVector3DInUnitSphere()
+    {
+        while (true) {
+            QVector3D p = randomVector3D(-1.0,1.0);
+            if (p.lengthSquared() < 1.0)
+                return p;
+        }
+    }
+
+    QVector3D randomVector3DNormalized()
+    {
+        return randomVector3DInUnitSphere().normalized();
+    }
+
+    QVector3D randomVector3DOnHemisphere(const QVector3D& a_normal)
+    {
+        QVector3D onUnitSphere = randomVector3DNormalized();
+        if (QVector3D::dotProduct(onUnitSphere, a_normal) > 0.0) // In the same hemisphere as the normal
+            return onUnitSphere;
+        else
+            return -onUnitSphere;
+    }
 }

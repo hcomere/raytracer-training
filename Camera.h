@@ -34,6 +34,8 @@ private:
     QVector3D m_pixel00Loc;
     QVector3D m_cameraCenter;
 
+    int m_maxDepth;
+
 public:
     Camera();
 
@@ -42,7 +44,7 @@ public:
 
 private:
 
-    QVector3D rayColor(const Ray& a_ray, const Hittable& a_world);
+    QVector3D rayColor(const Ray& a_ray, const Hittable& a_world, int a_remainingDepth);
     Ray getRay(int a_i, int a_j, bool a_random) const;
     QVector3D pixelSampleSquare() const;
 };

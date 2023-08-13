@@ -14,6 +14,11 @@ namespace common
 
     double randomDouble();
     double randomDouble(double a_min, double a_max);
+
+    QVector3D randomVector3D();
+    QVector3D randomVector3D(double a_min, double a_max);
+    QVector3D randomVector3DNormalized();
+    QVector3D randomVector3DOnHemisphere(const QVector3D& a_normal);
 }
 
 #endif

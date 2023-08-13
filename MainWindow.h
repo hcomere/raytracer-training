@@ -15,7 +15,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public:
+    int render();
+
 private:
-    Ui::MainWindow *ui;
+    void closeEvent(QCloseEvent *a_event) override;
+
+private:
+    Ui::MainWindow *m_ui;
+    bool m_exit;
 };
 #endif // MAINWINDOW_H

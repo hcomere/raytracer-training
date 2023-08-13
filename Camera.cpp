@@ -57,7 +57,8 @@ Camera::Camera()
     m_currentPixelSampleCount = 0;
     m_currentPixelColor = QVector3D(0, 0, 0);
 
-    m_samplesPerPixel = 10;   // Count of random samples for each pixel
+    m_samplesPerPixel = 100;   // Count of random samples for each pixel
+    m_maxDepth = 100;
 
     // World
 
@@ -65,13 +66,16 @@ Camera::Camera()
     m_world.add(std::make_shared<Sphere>(QVector3D(0,-100.5,-1), 100));
 }
 
-QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world)
+QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world, int a_remainingDepth)
 {
+    if(a_remainingDepth <= 0)
+        return QVector3D(0,0,0);
+
     HitRecord hit;
-    if(a_world.hit(a_ray, Interval(0.0, common::infinity), hit))
+    if(a_world.hit(a_ray, Interval(0.001, common::infinity), hit)) // 0.001 as min to avoid shadow acne issue
     {
-        QVector3D normalColor = (hit.m_normal + QVector3D(1.0, 1.0, 1.0)) * 0.5;
-        return normalColor;
+        QVector3D bounceDirection = common::randomVector3DOnHemisphere(hit.m_normal);
+        return 0.5 * rayColor(Ray(hit.m_p, bounceDirection), a_world, a_remainingDepth-1);
     }
 
     QVector3D unitDirection = a_ray.getDirection().normalized();
@@ -94,9 +98,10 @@ QPixmap Camera::computeImage(int a_feedbackInterval, bool& a_outIsFinished, floa
     int remainingTime = a_feedbackInterval - timer.elapsed();
     while (!m_isFinished && remainingTime > 0)
     {
-        Ray ray = getRay(m_currentPixelX, m_currentPixelY, m_currentPixelSampleCount > 0);
+        //Ray ray = getRay(m_currentPixelX, m_currentPixelY, m_currentPixelSampleCount > 0);
+        Ray ray = getRay(m_currentPixelX, m_currentPixelY, true);
 
-        QVector3D sampleColor = rayColor(ray, m_world);
+        QVector3D sampleColor = rayColor(ray, m_world, m_maxDepth);
         m_currentPixelColor += sampleColor;
 
         ++m_currentPixelSampleCount;
