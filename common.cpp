@@ -7,18 +7,9 @@ namespace common
         return a_degrees * pi / 180.0;
     }
 
-    QColor colorLerp(const QColor& a_color1, const QColor& a_color2, double a_t)
+    QVector3D lerp(const QVector3D& a_v1, const QVector3D& a_v2, double a_t)
     {
-        return QColor::fromRgbF(
-            (1.0 - a_t) * a_color1.redF() + a_t * a_color2.redF(),
-            (1.0 - a_t) * a_color1.greenF() + a_t * a_color2.greenF(),
-            (1.0 - a_t) * a_color1.blueF() + a_t * a_color2.blueF()
-            );
-    }
-
-    QColor colorMultScalar(const QColor& a_color, double a_scalar)
-    {
-        return QColor::fromRgbF(a_color.redF() * a_scalar, a_color.greenF() * a_scalar, a_color.blueF() * a_scalar);
+        return (1.0 - a_t) * a_v1 + a_t * a_v2;
     }
 
     double randomDouble()

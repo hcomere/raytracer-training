@@ -2,7 +2,7 @@
 #define COMMON_H
 
 #include <limits>
-#include <QColor>
+#include <QVector3D>
 
 namespace common
 {
@@ -10,8 +10,7 @@ namespace common
     static const double pi = 3.1415926535897932385;
 
     double degreesTo_Radians(double a_degrees);
-    QColor colorLerp(const QColor& a_color1, const QColor& a_color2, double a_t);
-    QColor colorMultScalar(const QColor& a_color, double a_scalar);
+    QVector3D lerp(const QVector3D& a_v1, const QVector3D& a_v2, double a_t);
 
     double randomDouble();
     double randomDouble(double a_min, double a_max);
