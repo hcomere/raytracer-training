@@ -1,7 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
 #include <QMainWindow>
+#include <Camera.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,9 +22,12 @@ public:
 
 private:
     void closeEvent(QCloseEvent *a_event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
     Ui::MainWindow *m_ui;
     bool m_exit;
+    bool m_imageComputationIsFinished;
+    std::unique_ptr<Camera> m_camera;
 };
 #endif // MAINWINDOW_H

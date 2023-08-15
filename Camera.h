@@ -1,7 +1,8 @@
-#ifndef RAYTRACER_H
-#define RAYTRACER_H
+#ifndef CAMERA_H
+#define CAMERA_H
 
-#include <QPixmap>
+#include <windows.h>
+
 #include <QColor>
 #include <QProgressBar>
 #include <Hittable.h>
@@ -13,12 +14,15 @@ class Camera
 {
 private:
 
-    QImage m_image;
+    HDC m_hdc;
+    HWND m_hwnd;
+    unsigned char * m_colorBuffer;
+    int m_windowWidth;
+    int m_windowHeight;
+
     int m_totalPixelCount;
     int m_computedPixels;
     bool m_isFinished;
-    int m_imageWidth;
-    int m_imageHeight;
 
     int m_currentPixelY;
     int m_currentPixelX;
@@ -37,10 +41,11 @@ private:
     int m_maxDepth;
 
 public:
-    Camera();
+    Camera(HWND a_hwnd, int a_windowWidth, int a_windowHeight);
 
 public:
-    QPixmap computeImage(int a_feedbackInterval, bool& a_outIsFinished, float& a_outPercent);
+    void computeImage(int a_feedbackInterval, bool& a_outIsFinished, float& a_outPercent);
+    void setSize(int a_width, int a_height);
 
 private:
 

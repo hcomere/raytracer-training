@@ -6,6 +6,8 @@
 #include <QVector3D>
 #include <QDebug>
 #include <Camera.h>
+#include <windows.h>
+#include <QResizeEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_exit(false)
 {
     m_ui->setupUi(this);
+    m_ui->drawSurface->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -27,29 +30,46 @@ void MainWindow::closeEvent(QCloseEvent *a_event)
 
 int MainWindow::render()
 {
-    bool finished = false;
     float percent = 0.0f;
-    Camera camera;
+
+    WId wid = m_ui->drawSurface->winId();
+    int width = m_ui->drawSurface->width();
+    int height = m_ui->drawSurface->height();
+
+    m_camera.reset(new Camera((HWND)wid, width, height));
 
     m_ui->progressBar->setRange(0, 100);
     m_ui->progressBar->setValue(0);
 
-    qDebug() << percent << "%";
+    m_imageComputationIsFinished = false;
 
     while(!m_exit)
     {
         QApplication::processEvents();
 
-        while(!finished)
+        if(!m_imageComputationIsFinished)
         {
-            QPixmap pixmap = camera.computeImage(16, finished, percent);
+            m_camera->computeImage(100, m_imageComputationIsFinished, percent);
             m_ui->progressBar->setValue(percent);
-            m_ui->label->setPixmap(pixmap);
+        }
+    }
+    return 0;
+}
 
-            qDebug() << percent << "%";
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if(object == m_ui->drawSurface)
+    {
+        if(event->type() == QEvent::Resize)
+        {
+            if(m_camera != nullptr)
+            {
+                QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
+                m_camera->setSize(resizeEvent->size().width(), resizeEvent->size().height());
+                m_imageComputationIsFinished = false;
+            }
         }
     }
 
-    qDebug() << "ciao";
-    return 0;
+    return false;
 }
