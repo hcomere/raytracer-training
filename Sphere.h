@@ -1,13 +1,21 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include <memory>
+
 #include <Hittable.h>
 #include <Ray.h>
 #include <QVector3D>
 
+class Material;
+
 class Sphere : public Hittable {
 public:
-    Sphere(const QVector3D& a_center, double a_radius) : m_center(a_center), m_radius(a_radius) {}
+    Sphere(const QVector3D& a_center, double a_radius, std::shared_ptr<Material> a_material)
+        : m_center(a_center)
+        , m_radius(a_radius)
+        , m_material(a_material)
+    {}
 
     bool hit(const Ray& a_ray, const Interval& a_tInterval, HitRecord& a_outHit) const override {
         QVector3D oc = a_ray.getOrigin() - m_center;
@@ -29,6 +37,7 @@ public:
 
         a_outHit.m_t = root;
         a_outHit.m_p = a_ray.at(root);
+        a_outHit.m_material = m_material;
 
         QVector3D outwardNormal = (a_outHit.m_p - m_center) / m_radius;
         a_outHit.setFaceNormal(a_ray, outwardNormal);
@@ -39,6 +48,7 @@ public:
 private:
     QVector3D m_center;
     double m_radius;
+    std::shared_ptr<Material> m_material;
 };
 
 #endif

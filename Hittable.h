@@ -1,14 +1,20 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
+#include <memory>
+
 #include <Ray.h>
 #include <QVector3D>
 #include <Interval.h>
+
+class Material;
 
 class HitRecord {
 public:
     QVector3D m_p;
     QVector3D m_normal;
+    std::shared_ptr<Material> m_material;
+
     double m_t;
     bool m_frontFace;
 

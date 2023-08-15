@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
         Interval.cpp
         Camera.h
         Camera.cpp
+        Material.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

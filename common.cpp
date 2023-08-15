@@ -62,4 +62,16 @@ namespace common
     {
         return QVector3D(sqrt(a_linearColor.x()), sqrt(a_linearColor.y()), sqrt(a_linearColor.z()));
     }
+
+    bool vector3DIsNearZero(const QVector3D &a_vector)
+    {
+        // Return true if the vector is close to zero in all dimensions.
+        auto s = 1e-8;
+        return (fabs(a_vector[0]) < s) && (fabs(a_vector[1]) < s) && (fabs(a_vector[2]) < s);
+    }
+
+    QVector3D reflectVector3D(const QVector3D &a_vector, const QVector3D &a_normal)
+    {
+        return a_vector - 2.0 * QVector3D::dotProduct(a_vector,a_normal)*a_normal;
+    }
 }

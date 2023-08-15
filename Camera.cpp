@@ -7,6 +7,7 @@
 #include <Hittable.h>
 #include <HittableList.h>
 #include <common.h>
+#include <Material.h>
 
 Camera::Camera(HWND a_hwnd, int a_windowWidth, int a_windowHeight)
     : m_isFinished(false)
@@ -19,8 +20,15 @@ Camera::Camera(HWND a_hwnd, int a_windowWidth, int a_windowHeight)
 
     // World
 
-    m_world.add(std::make_shared<Sphere>(QVector3D(0,0,-1), 0.5));
-    m_world.add(std::make_shared<Sphere>(QVector3D(0,-100.5,-1), 100));
+    std::shared_ptr<Material> materialGround = std::make_shared<LambertianMaterial>(QVector3D(0.8, 0.8, 0.0));
+    std::shared_ptr<Material> materialCenter = std::make_shared<LambertianMaterial>(QVector3D(0.7, 0.3, 0.3));
+    std::shared_ptr<Material> materialLeft = std::make_shared<MetalMaterial>(QVector3D(0.8, 0.8, 0.8), 0.3);
+    std::shared_ptr<Material> materialRight = std::make_shared<MetalMaterial>(QVector3D(0.8, 0.6, 0.2), 1.0);
+
+    m_world.add(std::make_shared<Sphere>(QVector3D( 0.0, -100.5, -1.0), 100.0, materialGround));
+    m_world.add(std::make_shared<Sphere>(QVector3D( 0.0,    0.0, -1.0),   0.5, materialCenter));
+    m_world.add(std::make_shared<Sphere>(QVector3D(-1.0,    0.0, -1.0),   0.5, materialLeft));
+    m_world.add(std::make_shared<Sphere>(QVector3D( 1.0,    0.0, -1.0),   0.5, materialRight));
 }
 
 QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world, int a_remainingDepth)
@@ -31,13 +39,11 @@ QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world, int a_rema
     HitRecord hit;
     if(a_world.hit(a_ray, Interval(0.001, common::infinity), hit)) // 0.001 as min to avoid shadow acne issue
     {
-        // non lambertian distribution
-        //QVector3D bounceDirection = common::randomVector3DOnHemisphere(hit.m_normal);
-
-        // lambertian distribution - more scattering around the normal
-        QVector3D bounceDirection = hit.m_normal + common::randomVector3DNormalized();
-
-        return 0.5 * rayColor(Ray(hit.m_p, bounceDirection), a_world, a_remainingDepth-1);
+        Ray scatteredRay;
+        QVector3D attenuatedColor;
+        if(hit.m_material->scatter(a_ray, hit, attenuatedColor, scatteredRay))
+            return attenuatedColor * rayColor(scatteredRay, a_world, a_remainingDepth-1);
+        return QVector3D(0, 0, 0);
     }
 
     QVector3D unitDirection = a_ray.getDirection().normalized();
