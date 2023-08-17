@@ -1,12 +1,12 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <Common.h>
 #include <windows.h>
 
 #include <QColor>
 #include <QProgressBar>
 #include <Hittable.h>
-#include <HittableList.h>
 
 #include <Ray.h>
 
@@ -23,13 +23,14 @@ private:
     int m_totalPixelCount;
     int m_computedPixels;
     bool m_isFinished;
+    bool m_isStarted;
 
     int m_currentPixelY;
     int m_currentPixelX;
     int m_currentPixelSampleCount;
     QVector3D m_currentPixelColor;
 
-    HittableList m_world;
+    WorldPtr m_world;
 
     int m_samplesPerPixel;
 
@@ -49,7 +50,7 @@ public:
 
 private:
 
-    QVector3D rayColor(const Ray& a_ray, const Hittable& a_world, int a_remainingDepth);
+    QVector3D rayColor(const Ray& a_ray, WorldPtr a_world, int a_remainingDepth);
     Ray getRay(int a_i, int a_j, bool a_random) const;
     QVector3D pixelSampleSquare() const;
 };

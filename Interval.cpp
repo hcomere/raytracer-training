@@ -1,8 +1,8 @@
 #include <Interval.h>
 
-#include <common.h>
+#include <Common.h>
 
-Interval::Interval() : m_min(+common::infinity), m_max(-common::infinity) {}
+Interval::Interval() : m_min(+infinity), m_max(-infinity) {}
 Interval::Interval(double a_min, double a_max) : m_min(a_min), m_max(a_max) {}
 
 bool Interval::contains(double x) const {
@@ -21,5 +21,5 @@ double Interval::clamp(double a_x) const
     return a_x;
 }
 
-const Interval Interval::empty(+common::infinity, -common::infinity);
-const Interval Interval::universe(-common::infinity, +common::infinity);
+const Interval Interval::empty(+infinity, -infinity);
+const Interval Interval::universe(-infinity, +infinity);

@@ -5,6 +5,7 @@
 #include <Hittable.h>
 #include <QVector3D>
 #include <common.h>
+#include <QVector3DUtils.h>
 
 class Material {
 public:
@@ -20,13 +21,13 @@ public:
 
     bool scatter(const Ray &a_sourceRay, const HitRecord &a_hit, QVector3D &a_outAttenuatedColor, Ray &a_outScatteredRay) const override
     {
-        QVector3D scatterDirection = a_hit.m_normal + common::randomVector3DNormalized();
+        QVector3D scatterDirection = a_hit.getNormal() + QVector3DUtils::randomVector3DNormalized();
 
         // Catch degenerate scatter direction
-        if (common::vector3DIsNearZero(scatterDirection))
-            scatterDirection = a_hit.m_normal;
+        if (QVector3DUtils::vector3DIsNearZero(scatterDirection))
+            scatterDirection = a_hit.getNormal();
 
-        a_outScatteredRay = Ray(a_hit.m_p, scatterDirection);
+        a_outScatteredRay = Ray(a_hit.getPoint(), scatterDirection);
         a_outAttenuatedColor = m_albedo;
         return true;
     }
@@ -44,10 +45,10 @@ public:
 
     bool scatter(const Ray &a_sourceRay, const HitRecord &a_hit, QVector3D &a_outAttenuatedColor, Ray &a_outScatteredRay) const override
     {
-        QVector3D reflected = common::reflectVector3D(a_sourceRay.getDirection().normalized(), a_hit.m_normal);
-        a_outScatteredRay = Ray(a_hit.m_p, reflected + m_fuzzRadius * common::randomVector3DNormalized());
+        QVector3D reflected = QVector3DUtils::reflectVector3D(a_sourceRay.getDirection().normalized(), a_hit.getNormal());
+        a_outScatteredRay = Ray(a_hit.getPoint(), reflected + m_fuzzRadius * QVector3DUtils::randomVector3DNormalized());
         a_outAttenuatedColor = m_albedo;
-        return (QVector3D::dotProduct(a_outScatteredRay.getDirection(), a_hit.m_normal) > 0);
+        return (QVector3D::dotProduct(a_outScatteredRay.getDirection(), a_hit.getNormal()) > 0);
     }
 
 private:

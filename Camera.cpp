@@ -5,43 +5,37 @@
 #include <QElapsedTimer>
 #include <Sphere.h>
 #include <Hittable.h>
-#include <HittableList.h>
-#include <common.h>
+#include <World.h>
+#include <Common.h>
+#include <QVector3DUtils.h>
+#include <CommonUtils.h>
 #include <Material.h>
+#include <QThread>
 
 Camera::Camera(HWND a_hwnd, int a_windowWidth, int a_windowHeight)
     : m_isFinished(false)
+    , m_isStarted(false)
     , m_colorBuffer(nullptr)
 {
     m_hwnd = a_hwnd;
     m_hdc = GetDC(a_hwnd);
 
+    m_world.reset(new World());
+
     setSize(a_windowWidth, a_windowHeight);
-
-    // World
-
-    std::shared_ptr<Material> materialGround = std::make_shared<LambertianMaterial>(QVector3D(0.8, 0.8, 0.0));
-    std::shared_ptr<Material> materialCenter = std::make_shared<LambertianMaterial>(QVector3D(0.7, 0.3, 0.3));
-    std::shared_ptr<Material> materialLeft = std::make_shared<MetalMaterial>(QVector3D(0.8, 0.8, 0.8), 0.3);
-    std::shared_ptr<Material> materialRight = std::make_shared<MetalMaterial>(QVector3D(0.8, 0.6, 0.2), 1.0);
-
-    m_world.add(std::make_shared<Sphere>(QVector3D( 0.0, -100.5, -1.0), 100.0, materialGround));
-    m_world.add(std::make_shared<Sphere>(QVector3D( 0.0,    0.0, -1.0),   0.5, materialCenter));
-    m_world.add(std::make_shared<Sphere>(QVector3D(-1.0,    0.0, -1.0),   0.5, materialLeft));
-    m_world.add(std::make_shared<Sphere>(QVector3D( 1.0,    0.0, -1.0),   0.5, materialRight));
 }
 
-QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world, int a_remainingDepth)
+QVector3D Camera::rayColor(const Ray& a_ray, WorldPtr a_world, int a_remainingDepth)
 {
     if(a_remainingDepth <= 0)
         return QVector3D(0,0,0);
 
     HitRecord hit;
-    if(a_world.hit(a_ray, Interval(0.001, common::infinity), hit)) // 0.001 as min to avoid shadow acne issue
+    if(a_world->hit(a_ray, Interval(0.001, infinity), hit)) // 0.001 as min to avoid shadow acne issue
     {
         Ray scatteredRay;
         QVector3D attenuatedColor;
-        if(hit.m_material->scatter(a_ray, hit, attenuatedColor, scatteredRay))
+        if(hit.getMaterial()->scatter(a_ray, hit, attenuatedColor, scatteredRay))
             return attenuatedColor * rayColor(scatteredRay, a_world, a_remainingDepth-1);
         return QVector3D(0, 0, 0);
     }
@@ -52,13 +46,26 @@ QVector3D Camera::rayColor(const Ray& a_ray, const Hittable& a_world, int a_rema
     QVector3D from(1.0, 1.0, 1.0);
     QVector3D to(0.5, 0.7, 1.0);
 
-    return common::lerp(from, to, t);
+    return QVector3DUtils::lerp(from, to, t);
 }
 
 void Camera::computeImage(int a_feedbackInterval, bool& a_outIsFinished, float& a_outPercent)
 {
     if(m_isFinished)
         return;
+
+    /*if(!m_isStarted)
+    {
+        // Get available logical cores.
+        int threadCount = QThread::idealThreadCount();
+
+        // Launch N computation thread letting one logical core free for the main thread.
+
+        for(int i = 0; i < threadCount - 1; ++i)
+        {
+
+        }
+    }*/
 
     QElapsedTimer timer;
     timer.start();
@@ -78,7 +85,7 @@ void Camera::computeImage(int a_feedbackInterval, bool& a_outIsFinished, float& 
             m_currentPixelColor /= m_samplesPerPixel;
 
             // Move from linear color space to gamma color space more suitable to display on screen.
-            m_currentPixelColor = common::linearToGamma(m_currentPixelColor);
+            m_currentPixelColor = QVector3DUtils::linearToGamma(m_currentPixelColor);
 
             int startIndex = (m_windowHeight - 1 - m_currentPixelY) * m_windowWidth * 4 + m_currentPixelX * 4;
             m_colorBuffer[startIndex+2] = m_currentPixelColor.x() * 255.0;
@@ -177,8 +184,8 @@ Ray Camera::getRay(int a_i, int a_j, bool a_random) const
 QVector3D Camera::pixelSampleSquare() const
 {
     // Returns a random point in the square surrounding a pixel at the origin.
-    double px = -0.5 + common::randomDouble();
-    double py = -0.5 + common::randomDouble();
+    double px = -0.5 + CommonUtils::randomDouble();
+    double py = -0.5 + CommonUtils::randomDouble();
     return (px * m_pixelDeltaU) + (py * m_pixelDeltaV);
 }
 
@@ -219,6 +226,7 @@ void Camera::setSize(int a_width, int a_height)
     m_computedPixels = 0;
 
     m_isFinished = false;
+    m_isStarted = false;
 
     m_currentPixelY = 0;
     m_currentPixelX = 0;

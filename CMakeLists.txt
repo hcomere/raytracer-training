@@ -21,15 +21,25 @@ set(PROJECT_SOURCES
         Mainwindow.ui
         Ray.h
         Hittable.h
-        HittableList.h
         Sphere.h
-        common.h
-        common.cpp
+        Common.h
         Interval.h
         Interval.cpp
         Camera.h
         Camera.cpp
         Material.h
+        Worker.h
+        Worker.cpp
+        ImageComputationData.h
+        ImageComputationData.cpp
+        World.h
+        World.cpp
+        HitRecord.h
+        HitRecord.cpp
+        QVector3DUtils.cpp
+        QVector3DUtils.h
+        CommonUtils.cpp
+        CommonUtils.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

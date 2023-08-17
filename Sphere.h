@@ -15,9 +15,11 @@ public:
         : m_center(a_center)
         , m_radius(a_radius)
         , m_material(a_material)
-    {}
+    {
+    }
 
-    bool hit(const Ray& a_ray, const Interval& a_tInterval, HitRecord& a_outHit) const override {
+    bool hit(const Ray& a_ray, const Interval& a_tInterval, HitRecord& a_outHit) const override
+    {
         QVector3D oc = a_ray.getOrigin() - m_center;
         double a = a_ray.getDirection().lengthSquared();
         double half_b = QVector3D::dotProduct(oc, a_ray.getDirection());
@@ -35,12 +37,9 @@ public:
                 return false;
         }
 
-        a_outHit.m_t = root;
-        a_outHit.m_p = a_ray.at(root);
-        a_outHit.m_material = m_material;
-
-        QVector3D outwardNormal = (a_outHit.m_p - m_center) / m_radius;
-        a_outHit.setFaceNormal(a_ray, outwardNormal);
+        QVector3D hitPoint = a_ray.at(root);
+        QVector3D outwardNormal = (hitPoint - m_center) / m_radius;
+        a_outHit = HitRecord(hitPoint, m_material, root, a_ray, outwardNormal);
 
         return true;
     }
@@ -48,7 +47,7 @@ public:
 private:
     QVector3D m_center;
     double m_radius;
-    std::shared_ptr<Material> m_material;
+    MaterialPtr m_material;
 };
 
 #endif
